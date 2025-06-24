@@ -7,6 +7,7 @@ interface AuthStore {
     getLoggedInUser: () => Promise<any>,
     loginFunction: (username: string, password: string) => Promise<any>,
     registerFunction: (username: string, password: string) => Promise<any>
+    logoutFunction: () => Promise<any>
 }
 
 const useAuthStore = create<AuthStore>((set, get) => ({
