@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import useCompanyStore from '@/zustand/useCompanyStore';
 
 const AuthPage = () => {
@@ -9,6 +10,7 @@ const AuthPage = () => {
     const [error, setError] = useState<string | null>(null);
 
     const { loginCompany, registerCompany } = useCompanyStore();
+    const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -19,17 +21,26 @@ const AuthPage = () => {
             return;
         }
 
-        try {
-            const response = isRegister
-                ? await registerCompany(companyName, password)
-                : await loginCompany(companyName, password);
 
-            if (response?.error) {
-                setError(response.error);
+
+        try {
+            if (isRegister) {
+                const res = await registerCompany(companyName, password);
+                if (res?.error) return setError(res.error);
+
+                // optional auto-login after registration
+                const loginRes = await loginCompany(companyName, password);
+                if (loginRes?.error) return setError(loginRes.error);
+
+                console.log(loginRes)
+                console.log(res)
+                // router.push('/main'); 
             } else {
-                console.log('Success', response);
-                // ✅ Optionally redirect here
-                // router.push('/company/dashboard')
+                const res = await loginCompany(companyName, password);
+                if (res?.error) return setError(res.error);
+
+                console.log(res)
+                router.push('/main'); 
             }
         } catch (err) {
             console.error(err);

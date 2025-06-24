@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { getAuthenticatedUser } from "@/utils/utility/getAuthenticatedUser";
+import { getAuthenticatedCompany } from "@/utils/utility/getAuthenticatedCompany";
 
 export const GET = async () => {
-    const user = await getAuthenticatedUser()
-    if (user?.error) return NextResponse.json('User is not authenticated or invalid token.', { status: 400 })
+    const company = await getAuthenticatedCompany()
+    if (company?.error) return NextResponse.json('Company is not authenticated or invalid token.', { status: 400 })
 
-    return NextResponse.json(user)
+    return NextResponse.json(company)
 }

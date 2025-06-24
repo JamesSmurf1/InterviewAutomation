@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation'; // ✅ Import router for redirection
 import useAuthStore from '@/zustand/useAuthStore';
 
 const AuthPage = () => {
@@ -10,6 +11,7 @@ const AuthPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   const { registerFunction, loginFunction } = useAuthStore();
+  const router = useRouter(); // ✅ Initialize router
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,13 +19,25 @@ const AuthPage = () => {
 
     try {
       if (isRegister) {
-        const res = await registerFunction(applicantName || username, password); // fallback to email if name not provided
-        if (res?.error) setError(res.error);
+        const res = await registerFunction(applicantName || username, password);
+        if (res?.error) {
+          setError(res.error);
+          return;
+        }
+        // optional: auto-login after register
+        const loginRes = await loginFunction(applicantName || username, password);
+        if (loginRes?.error) {
+          setError(loginRes.error);
+          return;
+        }
+        router.push('/main'); // ✅ redirect after register + login
       } else {
         const res = await loginFunction(username, password);
-        if (res?.error) setError(res.error);
-
-        console.log(res)
+        if (res?.error) {
+          setError(res.error);
+        } else {
+          router.push('/main'); // ✅ redirect after login
+        }
       }
     } catch (err) {
       console.error(err);
@@ -82,7 +96,10 @@ const AuthPage = () => {
           <button
             type="button"
             className="text-purple-500 font-semibold hover:underline transition cursor-pointer"
-            onClick={() => setIsRegister(!isRegister)}
+            onClick={() => {
+              setIsRegister(!isRegister);
+              setError(null);
+            }}
           >
             {isRegister ? 'Login here' : 'Register here'}
           </button>
