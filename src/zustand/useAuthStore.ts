@@ -14,14 +14,17 @@ const useAuthStore = create<AuthStore>((set, get) => ({
     authUser: null,
     getLoggedInUser: async () => {
         try {
-            let res = await fetch('/api/auth/me')
-            if (!res.ok) return console.log('Error, no logged in user.')
-            const data = await res.json()
-            if (!res.ok) return { error: data?.error }
-            set({ authUser: data })
-            return data
+            let res = await fetch('/api/auth/me');
+            if (!res.ok) {
+                set({ authUser: null });
+                return null;
+            }
+            const data = await res.json();
+            set({ authUser: data });
+            return data;
         } catch (error) {
-            console.log(error)
+            console.log(error);
+            return null;
         }
     },
     loginFunction: async (username, password) => {

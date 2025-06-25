@@ -1,7 +1,9 @@
 'use client';
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation'; // ✅ Import router for redirection
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
 import useAuthStore from '@/zustand/useAuthStore';
+import useCompanyStore from '@/zustand/useCompanyStore';
 
 const AuthPage = () => {
   const [isRegister, setIsRegister] = useState(false);
@@ -10,8 +12,23 @@ const AuthPage = () => {
   const [applicantName, setApplicantName] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const { registerFunction, loginFunction } = useAuthStore();
-  const router = useRouter(); // ✅ Initialize router
+  const { registerFunction, loginFunction, getLoggedInUser } = useAuthStore();
+  const { getLoggedInCompany } = useCompanyStore();
+
+  const router = useRouter();
+
+  // ✅ Redirect if already logged in (applicant or company)
+  useEffect(() => {
+    const checkAuth = async () => {
+      const user = await getLoggedInUser();
+      const company = await getLoggedInCompany();
+
+      if (user || company) {
+        router.replace('/main');
+      }
+    };
+    checkAuth();
+  }, [getLoggedInUser, getLoggedInCompany, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,19 +41,20 @@ const AuthPage = () => {
           setError(res.error);
           return;
         }
-        // optional: auto-login after register
+
         const loginRes = await loginFunction(applicantName || username, password);
         if (loginRes?.error) {
           setError(loginRes.error);
           return;
         }
-        router.push('/main'); // ✅ redirect after register + login
+
+        router.push('/main');
       } else {
         const res = await loginFunction(username, password);
         if (res?.error) {
           setError(res.error);
         } else {
-          router.push('/main'); // ✅ redirect after login
+          router.push('/main');
         }
       }
     } catch (err) {
@@ -68,7 +86,7 @@ const AuthPage = () => {
             />
           )}
           <input
-            placeholder="username"
+            placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 transition"

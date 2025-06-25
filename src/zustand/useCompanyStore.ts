@@ -15,15 +15,21 @@ const useCompanyStore = create<CompanyStore>((set, get) => ({
     getLoggedInCompany: async () => {
         try {
             const res = await fetch('/api/company/me');
+
+            if (!res.ok) {
+                set({ companyUser: null });
+                return null;
+            }
+
             const data = await res.json();
-            if (!res.ok) return { error: data?.error };
             set({ companyUser: data });
             return data;
         } catch (error) {
             console.error('Get Company Error:', error);
+            set({ companyUser: null });
+            return null;
         }
     },
-
     registerCompany: async (companyName, password) => {
         try {
             const res = await fetch('/api/company/register', {
@@ -47,6 +53,7 @@ const useCompanyStore = create<CompanyStore>((set, get) => ({
                 body: JSON.stringify({ companyName, password }),
             });
             const data = await res.json();
+            console.log(data)
             if (!res.ok) return { error: data?.error };
             set({ companyUser: data });
             return data;
