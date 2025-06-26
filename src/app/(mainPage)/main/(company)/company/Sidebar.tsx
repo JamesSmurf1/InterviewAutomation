@@ -1,13 +1,19 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import useCompanyStore from '@/zustand/useCompanyStore';
-
 import Link from 'next/link';
 
 const Sidebar = () => {
   const router = useRouter();
-  const { companyUser, logoutCompany } = useCompanyStore();
+  const { companyUser, getLoggedInCompany, logoutCompany } = useCompanyStore();
+
+  // Fetch companyUser on mount
+  useEffect(() => {
+    if (!companyUser) {
+      getLoggedInCompany();
+    }
+  }, [companyUser, getLoggedInCompany]);
 
   const handleLogout = async () => {
     await logoutCompany();
@@ -24,9 +30,7 @@ const Sidebar = () => {
             {companyUser?.companyName?.charAt(0) || 'C'}
           </div>
           <div>
-            <p className="font-semibold">
-              {companyUser?.companyName || 'Company'}
-            </p>
+            <p className="font-semibold">{companyUser?.companyName || 'Company'}</p>
             <p className="text-sm text-gray-400">COMPANY NAME</p>
           </div>
         </div>
@@ -35,10 +39,10 @@ const Sidebar = () => {
         <nav className="space-y-2">
           <Link href="/main/company/dashboard-overview"><SidebarItem label="Dashboard Overview" /></Link>
           <Link href="/main/company/post-job"><SidebarItem label="Post a Job" /></Link>
-          <SidebarItem label="Manage Listings" />
-          <SidebarItem label="View Applicants" />
-          <SidebarItem label="Messages" />
-          <SidebarItem label="Settings" />
+          <Link href="/main/company/manage-listings"><SidebarItem label="Manage Listings" /></Link>
+          <Link href="/main/company/view-applicants"><SidebarItem label="View Applicants" /></Link>
+          <Link href="/main/company/messages"><SidebarItem label="Messages" /></Link>
+          <Link href="/main/company/settings"><SidebarItem label="Settings" /></Link>
         </nav>
       </div>
 
