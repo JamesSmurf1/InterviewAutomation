@@ -4,8 +4,6 @@ import { useRouter } from 'next/navigation';
 
 import useAuthStore from '@/zustand/useAuthStore';
 import useCompanyStore from '@/zustand/useCompanyStore';
-import ApplicantDashboard from './(applicant)/ApplicantDashboard';
-import CompanyDashboard from './(company)/CompanyDashboard';
 
 const Page = () => {
   const router = useRouter();
@@ -13,13 +11,11 @@ const Page = () => {
   const {
     authUser,
     getLoggedInUser,
-    logoutFunction
   } = useAuthStore();
 
   const {
     companyUser,
     getLoggedInCompany,
-    logoutCompany
   } = useCompanyStore();
 
   const [loading, setLoading] = useState(true);
@@ -31,8 +27,12 @@ const Page = () => {
 
       if (!user && !company) {
         router.replace('/');
+      } else if (company) {
+        router.replace('/main/company');
+      } else if (user) {
+        router.replace('/main/applicant');
       } else {
-        setLoading(false);
+        router.replace('/');
       }
     };
 
@@ -42,17 +42,12 @@ const Page = () => {
   if (loading) {
     return (
       <div className="p-8 text-lg bg-black w-[100vw] h-[100vh] font-bold text-[32px] text-white flex items-center justify-center">
-        Please Wait.....
+        Please wait...
       </div>
-    )
+    );
   }
 
-  return (
-    <div>
-      {authUser && <ApplicantDashboard />}
-      {companyUser && <CompanyDashboard />}
-    </div>
-  );
+  return null; // no UI needed here because of redirection
 };
 
 export default Page;
