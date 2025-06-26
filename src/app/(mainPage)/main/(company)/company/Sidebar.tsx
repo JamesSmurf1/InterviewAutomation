@@ -3,13 +3,15 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import useCompanyStore from '@/zustand/useCompanyStore';
 
+import Link from 'next/link';
+
 const Sidebar = () => {
   const router = useRouter();
   const { companyUser, logoutCompany } = useCompanyStore();
 
   const handleLogout = async () => {
     await logoutCompany();
-    router.push('/'); 
+    router.push('/');
   };
 
   return (
@@ -31,8 +33,8 @@ const Sidebar = () => {
 
         {/* Main Navigation */}
         <nav className="space-y-2">
-          <SidebarItem label="Dashboard Overview" />
-          <SidebarItem label="Post a Job" />
+          <Link href="/main/company/dashboard-overview"><SidebarItem label="Dashboard Overview" /></Link>
+          <Link href="/main/company/post-job"><SidebarItem label="Post a Job" /></Link>
           <SidebarItem label="Manage Listings" />
           <SidebarItem label="View Applicants" />
           <SidebarItem label="Messages" />
