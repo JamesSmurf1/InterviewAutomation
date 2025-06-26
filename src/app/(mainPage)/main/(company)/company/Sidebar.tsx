@@ -21,7 +21,7 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="w-64 min-h-screen bg-[#0D0F1A] text-white flex flex-col justify-between p-4">
+    <aside className="w-64 h-[100vh] fixed bg-[#0D0F1A] text-white flex flex-col justify-between p-4">
       {/* Top Section */}
       <div>
         {/* Company Profile */}

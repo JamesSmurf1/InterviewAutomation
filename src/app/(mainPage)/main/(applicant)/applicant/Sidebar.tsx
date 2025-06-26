@@ -20,7 +20,7 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="w-64 min-h-screen bg-[#1A1A2E] text-white flex flex-col justify-between p-4">
+    <aside className="w-64 h-[100vh] fixed bg-[#0D0F1A] text-white flex flex-col justify-between p-4">
       <div>
         {/* Applicant Profile */}
         <div className="flex items-center gap-3 mb-8">
