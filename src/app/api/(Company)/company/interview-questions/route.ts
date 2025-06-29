@@ -1,4 +1,4 @@
-// app/api/company/interview-questions/route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
 import Job from '@/utils/model/company/Post-a-job.model';
 import { connectDb } from '@/utils/utility/ConnectDb';
