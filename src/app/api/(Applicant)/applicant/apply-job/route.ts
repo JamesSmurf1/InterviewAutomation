@@ -33,3 +33,37 @@ export const POST = async (request: Request) => {
     return NextResponse.json('Internal Server Error', { status: 500 });
   }
 };
+
+export const DELETE = async (request: Request) => {
+  try {
+    const userAuth = await getAuthenticatedUser();
+    if (!userAuth || !userAuth._id) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { JobId } = body;
+
+    const job = await Job.findById(JobId);
+
+    if (!job) {
+      return NextResponse.json({ message: 'Job not found' }, { status: 404 });
+    }
+
+    if (!job.applicants.includes(userAuth._id)) {
+      return NextResponse.json({ message: 'You have not applied to this job' }, { status: 400 });
+    }
+
+    job.applicants = job.applicants.filter(
+      (applicantId: any) => applicantId.toString() !== userAuth._id.toString()
+    );
+
+    await job.save();
+
+    return NextResponse.json({ message: 'Successfully unapplied from job' });
+
+  } catch (error) {
+    console.error('Error unapplying from job:', error);
+    return NextResponse.json('Internal Server Error', { status: 500 });
+  }
+};

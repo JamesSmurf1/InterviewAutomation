@@ -1,24 +1,45 @@
 'use client';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import useApplicantApiStore from '@/zustand/applicant/useApplicantApiStore';
 import useApplicantStore from '@/zustand/useApplicantStore';
+import toast from 'react-hot-toast';
 
 const AvailableJobs = () => {
   const { jobs, AvailableJobs, ApplyJobs } = useApplicantApiStore();
   const { authUser, getLoggedInUser } = useApplicantStore();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    AvailableJobs();
-    getLoggedInUser();
+    const fetchData = async () => {
+      setLoading(true);
+      await Promise.all([AvailableJobs(), getLoggedInUser()]);
+      setLoading(false);
+    };
+
+    fetchData();
   }, [AvailableJobs, getLoggedInUser]);
 
-  const handleSubmit = (id: string) => {
-    ApplyJobs(id);
+  const handleSubmit = async (id: string) => {
+    const toastId = toast.loading('Applying to job...');
+    try {
+      await ApplyJobs(id);
+      toast.success('Successfully applied to job!', { id: toastId });
+    } catch (error) {
+      toast.error('Failed to apply to job', { id: toastId });
+    }
   };
 
   const filteredJobs = Array.isArray(jobs)
     ? jobs.filter((job) => !job.applicants?.includes(authUser?._id))
     : [];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#0F1120]">
+        <span className="loading loading-spinner loading-lg text-white"></span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex">
@@ -75,7 +96,7 @@ const AvailableJobs = () => {
                 </p>
 
                 <button
-                  className="mt-3 bg-blue-600 hover:bg-blue-500 text-white px-4 py-1 rounded text-sm"
+                  className="mt-3 bg-blue-600 hover:bg-blue-500 text-white px-4 py-1 rounded text-sm cursor-pointer"
                   onClick={() => handleSubmit(job._id)}
                 >
                   Apply Job

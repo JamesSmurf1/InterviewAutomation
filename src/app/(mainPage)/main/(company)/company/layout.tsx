@@ -1,15 +1,35 @@
 'use client';
-import React from 'react';
-import Sidebar from './Sidebar';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import useCompanyStore from '@/zustand/useCompanyStore';
+import Sidebar from './Sidebar'; // adjust the path if needed
 
 const CompanyLayout = ({ children }: { children: React.ReactNode }) => {
+    const { companyUser, getLoggedInCompany } = useCompanyStore();
+    const router = useRouter();
+
+    // Fetch company info on layout mount
+    useEffect(() => {
+        const check = async () => {
+            await getLoggedInCompany();
+        };
+        check();
+    }, [getLoggedInCompany]);
+
+    // Redirect if not logged in
+    useEffect(() => {
+        if (companyUser === null) {
+            router.push('/');
+        }
+    }, [companyUser, router]);
+
+    // Avoid flashing content while checking auth
+    if (companyUser === null) return null;
+
     return (
-        <div className="flex min-h-screen">
+        <div className="flex">
             <Sidebar />
-            <div className='w-64'></div>
-            <main className="flex-1 bg-[#0F1120] p-8 text-white">
-                {children}
-            </main>
+            <main className="ml-64 flex-1">{children}</main>
         </div>
     );
 };

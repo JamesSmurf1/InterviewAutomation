@@ -5,11 +5,12 @@ interface ApplicantProps {
   myApplications: any[],
   AvailableJobs: () => Promise<void>;
   ApplyJobs: (id: any) => Promise<void>
+  RemoveApplication: (id: any) => Promise<void>
   GetMyApplications: () => Promise<void>;
 
 }
 
-const useApplicantApiStore = create<ApplicantProps>((set) => ({
+const useApplicantApiStore = create<ApplicantProps>((set, get) => ({
   jobs: [],
   myApplications: [],
 
@@ -23,7 +24,6 @@ const useApplicantApiStore = create<ApplicantProps>((set) => ({
     }
   },
   ApplyJobs: async (id: any) => {
-
     try {
       const res = await fetch('/api/applicant/apply-job', {
         method: 'POST',
@@ -32,9 +32,33 @@ const useApplicantApiStore = create<ApplicantProps>((set) => ({
         },
         body: JSON.stringify({ JobId: id })
       });
+
       const data = await res.json();
+
+      // Refresh states
+      await get().AvailableJobs();
+      await get().GetMyApplications();
     } catch (error) {
-      console.error(error)
+      console.error('Error applying to job:', error);
+    }
+  },
+  RemoveApplication: async (id: any) => {
+    try {
+      const res = await fetch('/api/applicant/apply-job', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ JobId: id })
+      });
+
+      const data = await res.json();
+      console.log('Unapplied:', data);
+
+      await get().GetMyApplications();
+      await get().AvailableJobs();
+    } catch (error) {
+      console.error('Error unapplying from job:', error);
     }
   },
   GetMyApplications: async () => {

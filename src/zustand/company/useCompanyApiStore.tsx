@@ -1,11 +1,13 @@
 import { create } from 'zustand';
+import toast from 'react-hot-toast';
 
 interface CompanyProps {
   postAJob: (formData: any) => Promise<any>;
   myListings: any[];
   getMyListing: () => Promise<void>;
   patchJob: (jobId: string, updates: any) => Promise<void>;
-  deleteJob: (jobId: string) => Promise<void>; // ✅ Add this
+  deleteJob: (jobId: string) => Promise<void>;
+  generateInterviewQuestions: (jobId: string) => Promise<string[] | null>;
 }
 
 const useCompanyApiStore = create<CompanyProps>((set, get) => ({
@@ -48,9 +50,7 @@ const useCompanyApiStore = create<CompanyProps>((set, get) => ({
         body: JSON.stringify({ jobId, updates }),
       });
 
-      if (!res.ok) {
-        throw new Error('Failed to update job');
-      }
+      if (!res.ok) throw new Error('Failed to update job');
 
       const updatedJob = await res.json();
       const current = get().myListings;
@@ -64,7 +64,6 @@ const useCompanyApiStore = create<CompanyProps>((set, get) => ({
     }
   },
 
-  // ✅ DELETE JOB HANDLER
   deleteJob: async (jobId) => {
     try {
       const res = await fetch(`/api/company/manage-listing?jobId=${jobId}`, {
@@ -78,6 +77,33 @@ const useCompanyApiStore = create<CompanyProps>((set, get) => ({
       }));
     } catch (err) {
       console.error('Error deleting job:', err);
+    }
+  },
+
+  generateInterviewQuestions: async (jobId) => {
+    const toastId = toast.loading('Generating questions...');
+    try {
+      const res = await fetch('/api/company/interview-questions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ jobId }),
+      });
+
+      const data = await res.json();
+
+      if (data.questions) {
+        toast.success('Questions generated!', { id: toastId });
+        return data.questions;
+      } else {
+        toast.error('Failed to generate questions', { id: toastId });
+        return null;
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Error generating questions', { id: toastId });
+      return null;
     }
   },
 }));

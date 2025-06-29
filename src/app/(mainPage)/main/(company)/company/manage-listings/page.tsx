@@ -1,15 +1,29 @@
-'use client'
+'use client';
 import React, { useEffect, useState } from 'react';
 import useCompanyApiStore from '@/zustand/company/useCompanyApiStore';
 import toast from 'react-hot-toast';
 
 const ManageListing = () => {
-    const { myListings, getMyListing, patchJob, deleteJob } = useCompanyApiStore();
+    const {
+        myListings,
+        getMyListing,
+        patchJob,
+        deleteJob,
+    } = useCompanyApiStore();
+
     const [editJobId, setEditJobId] = useState<string | null>(null);
     const [formData, setFormData] = useState<any>({});
+    const [loading, setLoading] = useState(true);
+    const [questionsModal, setQuestionsModal] = useState<string[] | null>(null);
 
     useEffect(() => {
-        getMyListing();
+        const fetchListings = async () => {
+            setLoading(true);
+            await getMyListing();
+            setLoading(false);
+        };
+
+        fetchListings();
     }, [getMyListing]);
 
     const handleEditClick = (job: any) => {
@@ -33,7 +47,7 @@ const ManageListing = () => {
     };
 
     const handleDelete = async (id: string) => {
-        const confirm = window.confirm("Are you sure you want to delete this job?");
+        const confirm = window.confirm('Are you sure you want to delete this job?');
         if (!confirm) return;
 
         const toastId = toast.loading('Deleting job...');
@@ -44,6 +58,39 @@ const ManageListing = () => {
             toast.error('Failed to delete', { id: toastId });
         }
     };
+
+    const generateInterviewQuestions = async (jobId: string) => {
+        const toastId = toast.loading('Generating questions...');
+        try {
+            const res = await fetch('/api/company/interview-questions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ jobId }),
+            });
+
+            const data = await res.json();
+
+            if (data.questions) {
+                setQuestionsModal(data.questions);
+                toast.success('Questions generated!', { id: toastId });
+            } else {
+                toast.error('Failed to generate questions', { id: toastId });
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error('Error generating questions', { id: toastId });
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-[#0F1120]">
+                <span className="loading loading-spinner loading-lg text-white"></span>
+            </div>
+        );
+    }
 
     return (
         <div className="flex">
@@ -61,15 +108,37 @@ const ManageListing = () => {
                             >
                                 {editJobId === job._id ? (
                                     <>
-                                        <input name="title" value={formData.title} onChange={handleChange} className="w-full p-2 bg-[#2C2F40] text-white rounded" />
-                                        <input name="position" value={formData.position} onChange={handleChange} className="w-full p-2 bg-[#2C2F40] text-white rounded" />
-                                        <input name="type" value={formData.type} onChange={handleChange} className="w-full p-2 bg-[#2C2F40] text-white rounded" />
-                                        <input name="location" value={formData.location} onChange={handleChange} className="w-full p-2 bg-[#2C2F40] text-white rounded" />
-                                        <input name="salary" value={formData.salary} onChange={handleChange} className="w-full p-2 bg-[#2C2F40] text-white rounded" />
-                                        <textarea name="description" value={formData.description} onChange={handleChange} className="w-full p-2 bg-[#2C2F40] text-white rounded" />
-                                        <textarea name="requirements" value={formData.requirements} onChange={handleChange} className="w-full p-2 bg-[#2C2F40] text-white rounded" />
-                                        <button onClick={handleUpdate} className="bg-blue-600 text-white px-3 py-1 rounded">Save</button>
-                                        <button onClick={() => setEditJobId(null)} className="text-sm text-red-400 ml-4">Cancel</button>
+                                        {['title', 'position', 'type', 'location', 'salary', 'description', 'requirements'].map((field) =>
+                                            field === 'description' || field === 'requirements' ? (
+                                                <textarea
+                                                    key={field}
+                                                    name={field}
+                                                    value={formData[field]}
+                                                    onChange={handleChange}
+                                                    className="w-full p-2 bg-[#2C2F40] text-white rounded"
+                                                />
+                                            ) : (
+                                                <input
+                                                    key={field}
+                                                    name={field}
+                                                    value={formData[field]}
+                                                    onChange={handleChange}
+                                                    className="w-full p-2 bg-[#2C2F40] text-white rounded"
+                                                />
+                                            )
+                                        )}
+                                        <button
+                                            onClick={handleUpdate}
+                                            className="bg-blue-600 text-white px-[25px] py-[15px] rounded cursor-pointer rounded-lg"
+                                        >
+                                            Save
+                                        </button>
+                                        <button
+                                            onClick={() => setEditJobId(null)}
+                                            className="text-sm bg-red-400 text-white px-[25px] py-[15px] ml-4 cursor-pointer rounded-lg"
+                                        >
+                                            Cancel
+                                        </button>
                                     </>
                                 ) : (
                                     <>
@@ -78,17 +147,63 @@ const ManageListing = () => {
                                         <p className="text-gray-300">{job.description}</p>
                                         <p className="text-sm text-gray-500">Location: {job.location}</p>
                                         {job.salary && <p className="text-sm text-gray-500">Salary: {job.salary}</p>}
-                                        {job.requirements && <p className="text-sm text-gray-400"><strong className="text-white">Requirements:</strong> {job.requirements}</p>}
+                                        {job.requirements && (
+                                            <p className="text-sm text-gray-400">
+                                                <strong className="text-white">Requirements:</strong> {job.requirements}
+                                            </p>
+                                        )}
                                         <p className="text-xs text-gray-500">Posted on: {new Date(job.createdAt).toLocaleDateString()}</p>
-                                        <div className="flex gap-4 mt-2">
-                                            <button onClick={() => handleEditClick(job)} className="text-sm text-blue-400">Edit</button>
-                                            <button onClick={() => handleDelete(job._id)} className="text-sm text-red-400">Delete</button>
+
+                                        <div className="flex flex-wrap gap-4 mt-4">
+                                            <button
+                                                onClick={() => handleEditClick(job)}
+                                                className="text-sm bg-blue-400 text-white px-[25px] py-[15px] rounded-lg cursor-pointer"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(job._id)}
+                                                className="text-sm bg-red-400 text-white px-[25px] py-[15px] rounded-lg cursor-pointer"
+                                            >
+                                                Delete
+                                            </button>
+                                            <label
+                                                htmlFor="questions-modal"
+                                                onClick={() => generateInterviewQuestions(job._id)}
+                                                className="text-sm bg-green-500 text-white px-[25px] py-[15px] rounded-lg cursor-pointer"
+                                            >
+                                                Generate Interview
+                                            </label>
                                         </div>
                                     </>
                                 )}
                             </div>
                         ))
                     )}
+                </div>
+
+                {/* DaisyUI Modal */}
+                <input type="checkbox" id="questions-modal" className="modal-toggle" checked={!!questionsModal} readOnly />
+                <div className="modal modal-bottom sm:modal-middle">
+                    <div className="modal-box bg-[#1E2130] text-white">
+                        <h3 className="font-bold text-lg mb-4">Generated Interview Questions</h3>
+                        {Array.isArray(questionsModal) && (
+                            <ul className="list-disc pl-5 space-y-2 text-sm">
+                                {questionsModal.map((q, idx) => (
+                                    <li key={idx}>{q}</li>
+                                ))}
+                            </ul>
+                        )}
+                        <div className="modal-action">
+                            <label
+                                htmlFor="questions-modal"
+                                onClick={() => setQuestionsModal(null)}
+                                className="btn btn-sm btn-primary"
+                            >
+                                Close
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>
