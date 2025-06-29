@@ -1,34 +1,35 @@
 import { create } from 'zustand';
-import toast from 'react-hot-toast';
 
 interface CompanyProps {
   postAJob: (formData: any) => Promise<any>;
   myListings: any[];
   getMyListing: () => Promise<void>;
-  patchJob: (jobId: string, updates: any) => Promise<void>;
-  deleteJob: (jobId: string) => Promise<void>;
+  patchJob: (jobId: string, updates: any) => Promise<boolean>;
+  deleteJob: (jobId: string) => Promise<boolean>;
   generateInterviewQuestions: (jobId: string) => Promise<string[] | null>;
+  deleteInterviewQuestions: (jobId: string) => Promise<boolean>;
+  getInterviewQuestions: (jobId: string) => Promise<string[] | null>;
 }
 
 const useCompanyApiStore = create<CompanyProps>((set, get) => ({
+  myListings: [],
+
   postAJob: async (formData: any) => {
     try {
       const res = await fetch('/api/company/post-a-job', {
         method: 'POST',
         headers: {
-          'content-type': 'application/json',
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
 
-      const data = await res.json();
-      console.log(data);
+      return await res.json();
     } catch (error) {
-      console.log(error);
+      console.error('Error posting job:', error);
+      throw error;
     }
   },
-
-  myListings: [],
 
   getMyListing: async () => {
     try {
@@ -50,7 +51,7 @@ const useCompanyApiStore = create<CompanyProps>((set, get) => ({
         body: JSON.stringify({ jobId, updates }),
       });
 
-      if (!res.ok) throw new Error('Failed to update job');
+      if (!res.ok) return false;
 
       const updatedJob = await res.json();
       const current = get().myListings;
@@ -59,8 +60,10 @@ const useCompanyApiStore = create<CompanyProps>((set, get) => ({
       );
 
       set({ myListings: updatedList });
+      return true;
     } catch (err) {
       console.error('Error updating job:', err);
+      return false;
     }
   },
 
@@ -70,18 +73,19 @@ const useCompanyApiStore = create<CompanyProps>((set, get) => ({
         method: 'DELETE',
       });
 
-      if (!res.ok) throw new Error('Failed to delete job');
+      if (!res.ok) return false;
 
       set((state) => ({
         myListings: state.myListings.filter((job) => job._id !== jobId),
       }));
+      return true;
     } catch (err) {
       console.error('Error deleting job:', err);
+      return false;
     }
   },
 
   generateInterviewQuestions: async (jobId) => {
-    const toastId = toast.loading('Generating questions...');
     try {
       const res = await fetch('/api/company/interview-questions', {
         method: 'POST',
@@ -92,17 +96,45 @@ const useCompanyApiStore = create<CompanyProps>((set, get) => ({
       });
 
       const data = await res.json();
+      return data.questions ?? null;
+    } catch (err) {
+      console.error('Error generating questions:', err);
+      return null;
+    }
+  },
 
-      if (data.questions) {
-        toast.success('Questions generated!', { id: toastId });
-        return data.questions;
-      } else {
-        toast.error('Failed to generate questions', { id: toastId });
+  deleteInterviewQuestions: async (jobId) => {
+    try {
+      const res = await fetch(`/api/company/interview-questions?jobId=${jobId}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) return false;
+
+      await get().getMyListing(); // Refresh listings after deletion
+      return true;
+    } catch (err) {
+      console.error('Error deleting questions:', err);
+      return false;
+    }
+  },
+
+  // New method to GET interview questions
+  getInterviewQuestions: async (jobId) => {
+    try {
+      const res = await fetch(`/api/company/interview-questions?jobId=${jobId}`, {
+        method: 'GET',
+      });
+
+      if (!res.ok) {
+        console.error('Failed to fetch interview questions');
         return null;
       }
+
+      const data = await res.json();
+      return data.questions ?? null;
     } catch (err) {
-      console.error(err);
-      toast.error('Error generating questions', { id: toastId });
+      console.error('Error fetching interview questions:', err);
       return null;
     }
   },

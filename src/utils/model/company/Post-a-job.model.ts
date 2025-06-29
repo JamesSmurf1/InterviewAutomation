@@ -34,14 +34,19 @@ const jobSchema = new mongoose.Schema(
       type: String,
     },
 
-  
     applicants: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Applicant',
       }
-    ]
+    ],
 
+    interviewQuestions: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'InterviewQuestion',
+      }
+    ]
   },
   { timestamps: true }
 );

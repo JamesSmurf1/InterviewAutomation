@@ -5,8 +5,15 @@ import useApplicantApiStore from '@/zustand/applicant/useApplicantApiStore';
 import toast from 'react-hot-toast';
 
 const MyApplications = () => {
-    const { authUser, getLoggedInUser } = useApplicantStore();
-    const { myApplications, GetMyApplications, RemoveApplication } = useApplicantApiStore();
+    const { getLoggedInUser } = useApplicantStore();
+    const {
+        myApplications,
+        GetMyApplications,
+        RemoveApplication,
+        GetInterviewQuestions,
+        interviewQuestions,
+    } = useApplicantApiStore();
+
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -26,6 +33,16 @@ const MyApplications = () => {
             toast.success('Application removed successfully!', { id: toastId });
         } catch (error) {
             toast.error('Failed to remove application', { id: toastId });
+        }
+    };
+
+    const handleTakeInterview = async (jobId: string) => {
+        const toastId = toast.loading('Fetching interview...');
+        try {
+            await GetInterviewQuestions(jobId);
+            toast.success('Interview questions loaded!', { id: toastId });
+        } catch {
+            toast.error('Failed to load interview questions', { id: toastId });
         }
     };
 
@@ -54,7 +71,8 @@ const MyApplications = () => {
                                 <h2 className="text-xl font-semibold">{job.title}</h2>
 
                                 <p className="text-sm text-gray-400 mb-1">
-                                    Company: <span className="text-white">{job?.posterId?.companyName}</span>
+                                    Company:{' '}
+                                    <span className="text-white">{job?.posterId?.companyName}</span>
                                 </p>
 
                                 <p className="text-sm text-gray-400">
@@ -86,16 +104,52 @@ const MyApplications = () => {
                                     Applied on: {new Date(job.createdAt).toLocaleDateString()}
                                 </p>
 
-                                <button
-                                    onClick={() => handleUnapply(job._id)}
-                                    className="mt-3 bg-red-500 hover:bg-red-400 text-white px-[25px] py-[15px] rounded-lg text-sm cursor-pointer"
-                                >
-                                    Unapply
-                                </button>
+                                <div className="flex gap-[15px] flex-wrap mt-4">
+                                    <button
+                                        onClick={() => handleUnapply(job._id)}
+                                        className="bg-red-500 hover:bg-red-400 text-white px-[25px] py-[15px] rounded-lg text-sm"
+                                    >
+                                        Unapply
+                                    </button>
+
+                                    {Array.isArray(job.interviewQuestions) &&
+                                        job.interviewQuestions.length > 0 && (
+                                            <button
+                                                onClick={() => handleTakeInterview(job._id)}
+                                                className="bg-blue-500 hover:bg-blue-400 text-white px-[25px] py-[15px] rounded-lg text-sm"
+                                            >
+                                                Take Interview
+                                            </button>
+                                        )}
+                                </div>
                             </div>
                         ))
                     )}
                 </div>
+
+                {/* Modal for Interview Questions */}
+                {interviewQuestions && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+                        <div className="bg-[#1E2130] p-6 rounded-lg w-[90%] max-w-xl text-white">
+                            <h2 className="text-lg font-bold mb-4">Interview Questions</h2>
+                            <ul className="list-disc space-y-2 text-sm pl-5 max-h-[300px] overflow-y-auto">
+                                {interviewQuestions.map((q, idx) => (
+                                    <li key={idx}>{q}</li>
+                                ))}
+                            </ul>
+                            <div className="mt-6 text-right">
+                                <button
+                                    onClick={() =>
+                                        useApplicantApiStore.setState({ interviewQuestions: null })
+                                    }
+                                    className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </main>
         </div>
     );
