@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 
-import User from "@/utils/model/User.model"
+import User from "@/utils/model/Applicant.model"
 
 const generateToken = ({ id }: { id: string }) => {
     const token = jwt.sign(

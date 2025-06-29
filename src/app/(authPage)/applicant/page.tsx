@@ -2,22 +2,21 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-import useAuthStore from '@/zustand/useAuthStore';
+import useApplicantStore from '@/zustand/useApplicantStore';
 import useCompanyStore from '@/zustand/useCompanyStore';
 
 const AuthPage = () => {
   const [isRegister, setIsRegister] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [applicantName, setApplicantName] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { registerFunction, loginFunction, getLoggedInUser } = useAuthStore();
+  const { registerFunction, loginFunction, getLoggedInUser } = useApplicantStore();
   const { getLoggedInCompany } = useCompanyStore();
 
   const router = useRouter();
 
-  // ✅ Redirect if already logged in (applicant or company)
   useEffect(() => {
     const checkAuth = async () => {
       const user = await getLoggedInUser();
@@ -36,13 +35,18 @@ const AuthPage = () => {
 
     try {
       if (isRegister) {
-        const res = await registerFunction(applicantName || username, password);
+        if (!agreedToTerms) {
+          setError('You must agree to the terms to register.');
+          return;
+        }
+
+        const res = await registerFunction(username, password);
         if (res?.error) {
           setError(res.error);
           return;
         }
 
-        const loginRes = await loginFunction(applicantName || username, password);
+        const loginRes = await loginFunction(username, password);
         if (loginRes?.error) {
           setError(loginRes.error);
           return;
@@ -75,38 +79,59 @@ const AuthPage = () => {
             : 'Login your Applicant to continue to your dashboard.'}
         </p>
 
-        <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
-          {isRegister && (
-            <input
-              type="text"
-              placeholder="Applicant Name"
-              value={applicantName}
-              onChange={(e) => setApplicantName(e.target.value)}
-              className="px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
-            />
-          )}
+        <form className="flex flex-col space-y-4 text-black" onSubmit={handleSubmit}>
           <input
-            placeholder="Username"
+            placeholder="Applicant name"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+            required
           />
+
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+            required
           />
+
+          {isRegister && (
+            <div className="flex items-center text-sm text-gray-700 space-x-2">
+              <input
+                type="checkbox"
+                id="terms"
+                checked={agreedToTerms}
+                onChange={() => setAgreedToTerms(!agreedToTerms)}
+                className="w-4 h-4"
+              />
+              <label htmlFor="terms">
+                I agree to the{' '}
+                <a
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-500 hover:underline"
+                >
+                  terms and conditions
+                </a>
+                .
+              </label>
+            </div>
+          )}
+
           <button
             type="submit"
-            className="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 rounded-lg transition cursor-pointer"
+            disabled={isRegister && !agreedToTerms}
+            className={`bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 rounded-lg transition ${
+              isRegister && !agreedToTerms ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             {isRegister ? 'Register' : 'Log In'}
           </button>
-          {error && (
-            <p className="text-red-500 text-sm text-center mt-2">{error}</p>
-          )}
+
+          {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-600">
@@ -117,6 +142,7 @@ const AuthPage = () => {
             onClick={() => {
               setIsRegister(!isRegister);
               setError(null);
+              setAgreedToTerms(false);
             }}
           >
             {isRegister ? 'Login here' : 'Register here'}

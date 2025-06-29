@@ -2,7 +2,7 @@
 
 import { create } from 'zustand'
 
-interface AuthStore {
+interface ApplicantStore {
     authUser: any,
     getLoggedInUser: () => Promise<any>,
     loginFunction: (username: string, password: string) => Promise<any>,
@@ -10,7 +10,7 @@ interface AuthStore {
     logoutFunction: () => Promise<any>
 }
 
-const useAuthStore = create<AuthStore>((set, get) => ({
+const useApplicantStore = create<ApplicantStore>((set, get) => ({
     authUser: null,
     getLoggedInUser: async () => {
         try {
@@ -70,4 +70,4 @@ const useAuthStore = create<AuthStore>((set, get) => ({
     }
 }))
 
-export default useAuthStore
+export default useApplicantStore

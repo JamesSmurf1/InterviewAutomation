@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import useAuthStore from '@/zustand/useAuthStore';
+import useApplicantStore from '@/zustand/useApplicantStore';
 import useCompanyStore from '@/zustand/useCompanyStore';
 
 const Page = () => {
@@ -11,7 +11,7 @@ const Page = () => {
   const {
     authUser,
     getLoggedInUser,
-  } = useAuthStore();
+  } = useApplicantStore();
 
   const {
     companyUser,

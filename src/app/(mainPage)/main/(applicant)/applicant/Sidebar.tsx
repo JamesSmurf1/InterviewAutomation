@@ -1,11 +1,11 @@
 'use client';
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import useAuthStore from '@/zustand/useAuthStore';
+import useApplicantStore from '@/zustand/useApplicantStore';
 import Link from 'next/link';
 
 const Sidebar = () => {
-  const { authUser, getLoggedInUser, logoutFunction } = useAuthStore();
+  const { authUser, getLoggedInUser, logoutFunction } = useApplicantStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -38,8 +38,8 @@ const Sidebar = () => {
           <Link href="/main/applicant/dashboard-overview">
             <SidebarItem label="Dashboard Overview" />
           </Link>
-          <Link href="/main/applicant/search-jobs">
-            <SidebarItem label="Search Jobs" />
+          <Link href="/main/applicant/available-jobs">
+            <SidebarItem label="Available Jobs" />
           </Link>
           <Link href="/main/applicant/my-applications">
             <SidebarItem label="My Applications" />

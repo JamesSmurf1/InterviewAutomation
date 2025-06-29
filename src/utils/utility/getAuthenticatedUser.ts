@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
-import Users from '../model/User.model';
+import Users from '../model/Applicant.model';
 import { connectDb } from './ConnectDb';
 
 export const getAuthenticatedUser = async () => {

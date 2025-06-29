@@ -2,7 +2,7 @@ import { connectDb } from "@/utils/utility/ConnectDb"
 import { NextResponse } from "next/server"
 import bcrypt from 'bcrypt'
 
-import User from "@/utils/model/User.model"
+import User from "@/utils/model/Applicant.model"
 
 
 export const POST = async (req: Request) => {

@@ -1,7 +1,12 @@
 'use client';
 import React, { useState } from 'react';
+import useCompanyApiStore from '@/zustand/company/useCompanyApiStore';
+import toast from 'react-hot-toast';
 
 const PostJobPage = () => {
+  const { postAJob } = useCompanyApiStore();
+  const [isLoading, setIsLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     title: '',
     position: '',
@@ -12,26 +17,48 @@ const PostJobPage = () => {
     requirements: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitted job:', formData);
+    setIsLoading(true);
 
-    // TODO: connect to backend or Zustand action here
-    // e.g., await postJob(formData);
+    const toastId = toast.loading('Posting job...');
+
+    try {
+      await postAJob(formData);
+      toast.success('Job posted successfully!', { id: toastId });
+
+      setFormData({
+        title: '',
+        position: '',
+        type: 'Full-time',
+        location: '',
+        salary: '',
+        description: '',
+        requirements: '',
+      });
+    } catch (error) {
+      toast.error('Failed to post job.', { id: toastId });
+    } finally {
+      setIsLoading(false);
+    }
   };
+
 
   return (
     <div className="flex">
       <main className="flex-1 bg-[#0F1120] p-8 text-white">
         <h1 className="text-2xl font-bold mb-6">Post a Job</h1>
         <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+
           <div>
             <label className="block mb-1 text-sm">Job Title</label>
             <input
@@ -120,9 +147,17 @@ const PostJobPage = () => {
 
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded transition"
+            disabled={isLoading}
+            className="btn bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded transition disabled:opacity-50"
           >
-            Post Job
+            {isLoading ? (
+              <>
+                <span className="loading loading-spinner"></span>
+                &nbsp;Posting...
+              </>
+            ) : (
+              'Post Job'
+            )}
           </button>
         </form>
       </main>

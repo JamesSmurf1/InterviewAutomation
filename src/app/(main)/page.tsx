@@ -5,12 +5,12 @@ import Button from '@/components/reusable/Button';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import useAuthStore from '@/zustand/useAuthStore';
+import useApplicantStore from '@/zustand/useApplicantStore';
 import useCompanyStore from '@/zustand/useCompanyStore';
 
 export default function Home() {
   const router = useRouter();
-  const { authUser, getLoggedInUser } = useAuthStore();
+  const { authUser, getLoggedInUser } = useApplicantStore();
   const { companyUser, getLoggedInCompany } = useCompanyStore();
 
   useEffect(() => {

@@ -3,20 +3,20 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import useCompanyStore from '@/zustand/useCompanyStore';
-import useAuthStore from '@/zustand/useAuthStore';
+import useApplicantStore from '@/zustand/useApplicantStore';
 
 const AuthPage = () => {
   const [isRegister, setIsRegister] = useState(false);
   const [companyName, setCompanyName] = useState('');
   const [password, setPassword] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { loginCompany, registerCompany, getLoggedInCompany } = useCompanyStore();
-  const { getLoggedInUser } = useAuthStore();
+  const { getLoggedInUser } = useApplicantStore();
 
   const router = useRouter();
 
-  // ✅ Redirect to /main if already logged in (company or applicant)
   useEffect(() => {
     const checkSession = async () => {
       const user = await getLoggedInUser();
@@ -32,6 +32,11 @@ const AuthPage = () => {
 
     if (!companyName || !password) {
       setError('All fields are required');
+      return;
+    }
+
+    if (isRegister && !agreedToTerms) {
+      setError('You must agree to the terms to register.');
       return;
     }
 
@@ -68,13 +73,14 @@ const AuthPage = () => {
             : 'Login your Company to continue to your dashboard.'}
         </p>
 
-        <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
+        <form className="flex flex-col space-y-4 text-black" onSubmit={handleSubmit}>
           <input
             type="text"
             placeholder="Company Name"
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
             className="px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+            required
           />
           <input
             type="password"
@@ -82,13 +88,42 @@ const AuthPage = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+            required
           />
+
+          {isRegister && (
+            <div className="flex items-center text-sm text-gray-700 space-x-2">
+              <input
+                type="checkbox"
+                id="terms"
+                checked={agreedToTerms}
+                onChange={() => setAgreedToTerms(!agreedToTerms)}
+                className="w-4 h-4"
+              />
+              <label htmlFor="terms">
+                I agree to the{' '}
+                <a
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-500 hover:underline"
+                >
+                  terms and conditions
+                </a>
+                .
+              </label>
+            </div>
+          )}
+
           <button
             type="submit"
-            className="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 rounded-lg transition cursor-pointer"
+            disabled={isRegister && !agreedToTerms}
+            className={`bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 rounded-lg transition ${isRegister && !agreedToTerms ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
           >
             {isRegister ? 'Register' : 'Log In'}
           </button>
+
           {error && (
             <p className="text-red-500 text-sm text-center mt-2">{error}</p>
           )}
@@ -101,6 +136,7 @@ const AuthPage = () => {
             className="text-purple-500 font-semibold hover:underline transition cursor-pointer"
             onClick={() => {
               setError(null);
+              setAgreedToTerms(false);
               setIsRegister(!isRegister);
             }}
           >
