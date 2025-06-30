@@ -10,6 +10,7 @@ interface ApplicantProps {
   RemoveApplication: (id: any) => Promise<void>;
   GetMyApplications: () => Promise<void>;
   GetInterviewQuestions: (jobId: string) => Promise<void>;
+  submitAnswer: (answers: string[], jobId: string, applicantId: string) => Promise<void>;
 }
 
 const useApplicantApiStore = create<ApplicantProps>((set, get) => ({
@@ -82,6 +83,7 @@ const useApplicantApiStore = create<ApplicantProps>((set, get) => ({
       });
 
       const data = await res.json();
+      console.log(data)
 
       if (!res.ok) {
         throw new Error(data.message || 'Failed to fetch questions');
@@ -93,6 +95,26 @@ const useApplicantApiStore = create<ApplicantProps>((set, get) => ({
       set({ interviewQuestions: null });
     }
   },
+
+  submitAnswer: async (answers: string[], jobId: string, applicantId: string) => {
+    try {
+      const res = await fetch('/api/applicant/applicant-answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answers, jobId, applicantId }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to submit answers');
+      }
+    } catch (error) {
+      console.error('Error submitting answers:', error);
+      throw error;
+    }
+  }
+
 
 }));
 

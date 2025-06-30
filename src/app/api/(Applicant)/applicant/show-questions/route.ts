@@ -1,4 +1,3 @@
-// /app/api/interview-questions/route.ts (or /pages/api/interview-questions.ts if using pages)
 import { NextResponse } from 'next/server';
 import { connectDb } from '@/utils/utility/ConnectDb';
 import InterviewQuestion from '@/utils/model/company/Question.model';
