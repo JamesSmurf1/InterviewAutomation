@@ -4,10 +4,13 @@ import useCompanyApiStore from '@/zustand/company/useCompanyApiStore';
 import toast from 'react-hot-toast';
 
 const ViewApplicants = () => {
-    const { myListings, getMyListing } = useCompanyApiStore();
+    const { myListings, getMyListing, getApplicantsOnJob } = useCompanyApiStore();
+
     const [applicants, setApplicants] = useState<any[]>([]);
     const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [expandedApplicantId, setExpandedApplicantId] = useState<string | null>(null);
+    const [showQuestions, setShowQuestions] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -15,16 +18,25 @@ const ViewApplicants = () => {
             await getMyListing();
             setLoading(false);
         };
-
         fetchData();
     }, [getMyListing]);
 
     const handleSelectJob = async (jobId: string) => {
         setSelectedJobId(jobId);
         setLoading(true);
-        // const data = await getApplicantsByJob(jobId);
-        // setApplicants(data);
+        const data = await getApplicantsOnJob(jobId);
+        if (data) {
+            setApplicants(data);
+        } else {
+            toast.error('Failed to fetch applicants for this job.');
+            setApplicants([]);
+        }
         setLoading(false);
+        setExpandedApplicantId(null); // Reset view on new selection
+    };
+
+    const toggleAnswers = (applicantId: string) => {
+        setExpandedApplicantId(prev => (prev === applicantId ? null : applicantId));
     };
 
     return (
@@ -60,38 +72,66 @@ const ViewApplicants = () => {
                     <p className="text-gray-400">No applicants yet for this job.</p>
                 ) : (
                     <div className="space-y-4">
-                        {applicants.map((applicant) => (
-                            <div
-                                key={applicant._id}
-                                className="bg-[#1E2130] p-5 rounded-lg border border-gray-700 shadow"
-                            >
-                                <h2 className="text-xl font-semibold">
-                                    {applicant.applicant?.name ?? 'Unknown Applicant'}
-                                </h2>
-                                <p className="text-sm text-gray-400">Position: {applicant.job?.position}</p>
-                                <p className="text-sm text-gray-400 mt-2">
-                                    Status:{' '}
-                                    <span className="text-white capitalize">
-                                        {applicant.status ?? 'Pending'}
-                                    </span>
-                                </p>
-                                <p className="text-xs text-gray-500 mt-2">
-                                    Applied on: {new Date(applicant.createdAt).toLocaleDateString()}
-                                </p>
+                        {applicants.map((applicant: any) => {
+                            const isExpanded = expandedApplicantId === applicant._id;
+                            return (
+                                <div
+                                    key={applicant._id}
+                                    className="bg-[#1E2130] p-5 rounded-lg border border-gray-700 shadow"
+                                >
+                                    <h2 className="text-xl font-semibold">
+                                        {applicant.applicant?.username ?? 'Unknown Applicant'}
+                                    </h2>
+                                    <p className="text-sm text-gray-400">
+                                        Answers submitted: {applicant.answers?.length ?? 0}
+                                    </p>
+                                    <p className="text-xs text-gray-500 mt-2">
+                                        Applied on: {new Date(applicant.createdAt).toLocaleDateString()}
+                                    </p>
 
-                                <div className="flex gap-4 mt-4">
-                                    <button className="bg-green-600 text-white px-5 py-2 rounded-lg text-sm">
-                                        View Answers
-                                    </button>
-                                    <button className="bg-blue-500 text-white px-5 py-2 rounded-lg text-sm">
-                                        Invite for Interview
-                                    </button>
-                                    <button className="bg-red-500 text-white px-5 py-2 rounded-lg text-sm">
-                                        Reject
-                                    </button>
+                                    <div className="flex gap-4 mt-4">
+                                        <button
+                                            onClick={() => toggleAnswers(applicant._id)}
+                                            className="bg-green-600 text-white px-5 py-2 rounded-lg text-sm"
+                                        >
+                                            {isExpanded ? 'Hide Answers' : 'View Answers'}
+                                        </button>
+
+                                        <button
+                                            onClick={() => setShowQuestions(prev => !prev)}
+                                            className="bg-yellow-600 text-white px-5 py-2 rounded-lg text-sm"
+                                        >
+                                            {showQuestions ? 'Hide Questions' : 'Show Questions'}
+                                        </button>
+
+                                        <button className="bg-blue-500 text-white px-5 py-2 rounded-lg text-sm">
+                                            Invite for Interview
+                                        </button>
+                                        <button className="bg-red-500 text-white px-5 py-2 rounded-lg text-sm">
+                                            Reject
+                                        </button>
+                                    </div>
+
+                                    {/* Answers and Questions */}
+                                    {isExpanded && (
+                                        <div className="mt-4 space-y-2 text-sm text-white border-t border-gray-600 pt-4">
+                                            {applicant.answers?.map((answer: string, index: number) => (
+                                                <div key={index} className="mb-2">
+                                                    {showQuestions && (
+                                                        <p className="text-gray-400 font-medium">
+                                                            Q{index + 1}: {applicant.interviewQuestion?.questions?.[index]}
+                                                        </p>
+                                                    )}
+                                                    <p className="text-white ml-2">
+                                                        <span className="text-green-400">Answer:</span> {answer}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </main>
