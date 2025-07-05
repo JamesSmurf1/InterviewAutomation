@@ -44,9 +44,6 @@ const Sidebar = () => {
           <Link href="/main/applicant/my-applications">
             <SidebarItem label="My Applications" />
           </Link>
-          <Link href="/main/applicant/saved-jobs">
-            <SidebarItem label="Saved Jobs" />
-          </Link>
           <Link href="/main/applicant/messages">
             <SidebarItem label="Messages" />
           </Link>

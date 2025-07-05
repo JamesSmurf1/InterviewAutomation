@@ -5,48 +5,44 @@ const jobSchema = new mongoose.Schema(
     posterId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Company',
-      required: true
-    },
-    title: {
-      type: String,
       required: true,
     },
-    position: {
-      type: String,
-      required: true,
-    },
+    title: String,
+    position: String,
     type: {
       type: String,
       default: 'Full-time',
     },
-    location: {
-      type: String,
-      required: true,
-    },
-    salary: {
-      type: String,
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    requirements: {
-      type: String,
-    },
+    location: String,
+    salary: String,
+    description: String,
+    requirements: String,
 
     applicants: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Applicant',
-      }
+        applicant: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Applicant',
+          required: true,
+        },
+        status: {
+          type: String,
+          enum: ['pending', 'interview', 'rejected'],
+          default: 'pending',
+        },
+        answers: {
+          type: [String],
+          default: [],
+        },
+      },
     ],
 
     interviewQuestions: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'InterviewQuestion',
-      }
-    ]
+      },
+    ],
   },
   { timestamps: true }
 );

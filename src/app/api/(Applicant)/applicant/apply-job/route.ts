@@ -19,11 +19,21 @@ export const POST = async (request: Request) => {
     }
 
     // Prevent duplicate applications
-    if (job.applicants.includes(userAuth._id)) {
+    const alreadyApplied = job.applicants.some(
+      (a: any) => a.applicant?.toString() === userAuth._id.toString()
+    );
+
+    if (alreadyApplied) {
       return NextResponse.json({ message: 'You have already applied to this job' }, { status: 400 });
     }
 
-    job.applicants.push(userAuth._id);
+    // ✅ Push proper applicant object
+    job.applicants.push({
+      applicant: userAuth._id,
+      status: 'pending',
+      answers: []
+    });
+
     await job.save();
 
     return NextResponse.json({ message: 'Successfully applied to job' });
@@ -33,6 +43,7 @@ export const POST = async (request: Request) => {
     return NextResponse.json('Internal Server Error', { status: 500 });
   }
 };
+
 
 export const DELETE = async (request: Request) => {
   try {
