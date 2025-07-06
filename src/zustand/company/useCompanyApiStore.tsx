@@ -18,6 +18,7 @@ interface CompanyProps {
   deleteInterviewQuestions: (jobId: string) => Promise<boolean>;
   getInterviewQuestions: (jobId: string) => Promise<string[] | null>;
   getApplicantsOnJob: (jobId: string) => Promise<string[] | null>;
+  viewQuestion: (jobId: string) => Promise<string[] | null>;
   getDashboardData: () => Promise<DashboardStats | null>;
 }
 
@@ -151,6 +152,29 @@ const useCompanyApiStore = create<CompanyProps>((set, get) => ({
   getApplicantsOnJob: async (jobId) => {
     try {
       const res = await fetch(`/api/company/get-applicants`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({ listingId: jobId })
+      });
+
+      if (!res.ok) {
+        console.error('Failed to fetch applicants');
+        return null;
+      }
+
+      const data = await res.json();
+      return data.applicants ?? [];
+    } catch (err) {
+      console.error('Error fetching applicants:', err);
+      return null;
+    }
+  },
+
+  viewQuestion: async (jobId) => {
+    try {
+      const res = await fetch(`/api/company/view-answers`, {
         method: 'POST',
         headers: {
           'content-type': 'application/json'

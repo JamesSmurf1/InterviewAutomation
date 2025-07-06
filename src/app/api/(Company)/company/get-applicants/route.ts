@@ -18,8 +18,10 @@ export const POST = async (req: Request) => {
     }
 
     const job = await Job.findById(listingId)
-      .populate("applicants.applicant", "username email") // ✅ populate actual user details
-      .populate("interviewQuestions"); // optional
+      .populate("applicants.applicant", "username") // ✅ populate actual user details
+      .populate("interviewQuestions");
+
+      console.log(job)
 
     // console.log(JSON.stringify(job, null, 2)); // 👈 full output
 

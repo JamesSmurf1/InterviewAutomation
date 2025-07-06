@@ -2,7 +2,7 @@
 import ApplicantAnswer from "@/utils/model/applicant/ApplicantAnswer.model";
 import { connectDb } from "@/utils/utility/ConnectDb";
 import { NextResponse } from "next/server";
-import "@/utils/model/Applicant.model"; // Ensure it's registered
+import "@/utils/model/Applicant.model";
 import "@/utils/model/company/Question.model";
 import "@/utils/model/company/Post-a-job.model";
 
@@ -16,9 +16,12 @@ export const POST = async (req: Request) => {
             return NextResponse.json({ message: "Missing listingId" }, { status: 400 });
         }
 
-        const applicants = await ApplicantAnswer.find({ job: listingId })
-            .populate("applicant", "username") // ✅ Get only username, not password
-            .populate("interviewQuestion", "questions"); // ✅ Get only questions field
+        const applicants = await ApplicantAnswer.find({ job: listingId }) // ✅ CORRECT filter
+            .populate("applicant", "username")
+            .populate("interviewQuestion", "questions");
+
+        
+        // console.log(applicants)
 
         return NextResponse.json({ applicants }, { status: 200 });
     } catch (err) {
