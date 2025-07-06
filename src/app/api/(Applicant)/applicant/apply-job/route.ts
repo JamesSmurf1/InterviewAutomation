@@ -87,6 +87,8 @@ export const POST = async (request: Request) => {
 
 export const DELETE = async (request: Request) => {
   try {
+    await connectDb();
+
     const userAuth = await getAuthenticatedUser();
     if (!userAuth || !userAuth._id) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -101,12 +103,18 @@ export const DELETE = async (request: Request) => {
       return NextResponse.json({ message: 'Job not found' }, { status: 404 });
     }
 
-    if (!job.applicants.includes(userAuth._id)) {
+    // ✅ Check if user has applied (with correct nested structure)
+    const applied = job.applicants.some(
+      (entry: any) => entry.applicant.toString() === userAuth._id.toString()
+    );
+
+    if (!applied) {
       return NextResponse.json({ message: 'You have not applied to this job' }, { status: 400 });
     }
 
+    // ✅ Remove the applicant object
     job.applicants = job.applicants.filter(
-      (applicantId: any) => applicantId.toString() !== userAuth._id.toString()
+      (entry: any) => entry.applicant.toString() !== userAuth._id.toString()
     );
 
     await job.save();
