@@ -150,7 +150,7 @@ const useCompanyApiStore = create<CompanyProps>((set, get) => ({
 
   getApplicantsOnJob: async (jobId) => {
     try {
-      const res = await fetch(`/api/company/view-answers`, {
+      const res = await fetch(`/api/company/get-applicants`, {
         method: 'POST',
         headers: {
           'content-type': 'application/json'
