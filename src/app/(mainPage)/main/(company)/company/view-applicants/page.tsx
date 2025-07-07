@@ -4,7 +4,7 @@ import useCompanyApiStore from '@/zustand/company/useCompanyApiStore';
 import toast from 'react-hot-toast';
 
 const ViewApplicants = () => {
-  const { myListings, getMyListing, getApplicantsOnJob, viewQuestion } = useCompanyApiStore();
+  const { myListings, getMyListing, getApplicantsOnJob, viewQuestion, setStatus } = useCompanyApiStore();
 
   const [applicants, setApplicants] = useState<any[]>([]);
   const [interviewQuestions, setInterviewQuestions] = useState<string[]>([]);
@@ -21,6 +21,12 @@ const ViewApplicants = () => {
     };
     fetchData();
   }, [getMyListing]);
+
+  const handleStatus = (status: string, applicantId: any, listingId: any) => {
+    setStatus(status, applicantId, listingId)
+
+    console.log(status)
+  }
 
   const handleSelectJob = async (jobId: string) => {
     setSelectedJobId(jobId);
@@ -129,10 +135,10 @@ const ViewApplicants = () => {
                       {questionsLoaded ? 'Hide Questions' : 'Show Questions'}
                     </button>
 
-                    <button className="bg-blue-500 text-white px-5 py-2 rounded-lg text-sm">
-                      Invite for Interview
+                    <button className="bg-blue-500 text-white px-5 py-2 rounded-lg text-sm" onClick={() => handleStatus('Accepted', applicant._id, selectedJobId)}>
+                      Accept
                     </button>
-                    <button className="bg-red-500 text-white px-5 py-2 rounded-lg text-sm">
+                    <button className="bg-red-500 text-white px-5 py-2 rounded-lg text-sm" onClick={() => handleStatus('Reject', applicant._id, selectedJobId)}>
                       Reject
                     </button>
                   </div>

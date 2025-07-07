@@ -20,6 +20,9 @@ interface CompanyProps {
   getApplicantsOnJob: (jobId: string) => Promise<string[] | null>;
   viewQuestion: (jobId: string) => Promise<string[] | null>;
   getDashboardData: () => Promise<DashboardStats | null>;
+
+  setStatus: (status: string, applicantId: any, listingId: any) => Promise<void>;
+
 }
 
 const useCompanyApiStore = create<CompanyProps>((set, get) => ({
@@ -190,14 +193,13 @@ const useCompanyApiStore = create<CompanyProps>((set, get) => ({
         return null;
       }
 
-      const data = await res.json(); // This is a string[] directly
-      return data; // ✅ return the array directly
+      const data = await res.json();
+      return data;
     } catch (err) {
       console.error('Error fetching interview questions:', err);
       return null;
     }
   },
-
 
   getDashboardData: async () => {
     try {
@@ -213,7 +215,34 @@ const useCompanyApiStore = create<CompanyProps>((set, get) => ({
       console.error('Error fetching dashboard data:', err);
       return null;
     }
+  },
+
+  setStatus: async (status: string, applicantId: any, listingId: any) => {
+    try {
+      const res = await fetch(`/api/company/status`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({ status, applicantId, listingId })
+      });
+
+      if (!res.ok) {
+        console.error('Failed to fetch applicants');
+        return null;
+      }
+
+      const data = await res.json();
+
+      console.log(data)
+
+      return data.applicants ?? [];
+    } catch (err) {
+      console.error('Error fetching applicants:', err);
+      return null;
+    }
   }
+
 }));
 
 export default useCompanyApiStore;
