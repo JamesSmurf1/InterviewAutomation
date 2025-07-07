@@ -186,17 +186,18 @@ const useCompanyApiStore = create<CompanyProps>((set, get) => ({
       });
 
       if (!res.ok) {
-        console.error('Failed to fetch applicants');
+        console.error('Failed to fetch interview questions');
         return null;
       }
 
-      const data = await res.json();
-      return data.applicants ?? [];
+      const data = await res.json(); // This is a string[] directly
+      return data; // ✅ return the array directly
     } catch (err) {
-      console.error('Error fetching applicants:', err);
+      console.error('Error fetching interview questions:', err);
       return null;
     }
   },
+
 
   getDashboardData: async () => {
     try {

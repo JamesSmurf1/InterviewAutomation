@@ -43,6 +43,8 @@ const ViewApplicants = () => {
   };
 
   const handleToggleQuestions = async () => {
+
+    console.log(selectedJobId)
     if (!selectedJobId) return;
 
     if (questionsLoaded) {
@@ -52,6 +54,7 @@ const ViewApplicants = () => {
     }
 
     const data = await viewQuestion(selectedJobId);
+
     if (Array.isArray(data)) {
       setInterviewQuestions(data);
       setQuestionsLoaded(true);

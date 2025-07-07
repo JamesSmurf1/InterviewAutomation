@@ -19,7 +19,7 @@ export const POST = async (req: Request) => {
 
         const jobListing = await Job.findOne({ _id: listingId })
 
-        console.log( jobListing.interviewQuestions)
+        // console.log( jobListing.interviewQuestions)
 
         return NextResponse.json(jobListing.interviewQuestions);
     } catch (err) {
