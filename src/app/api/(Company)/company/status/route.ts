@@ -11,15 +11,15 @@ export const POST = async (req: Request) => {
         const body = await req.json();
         const { status, applicantId, listingId } = body;
 
-        console.log('Status:', status);
-        console.log('Applicant ID:', applicantId);
-        console.log('Listing ID:', listingId);
+        // console.log('Status:', status);
+        // console.log('Applicant ID:', applicantId);
+        // console.log('Listing ID:', listingId);
 
         // Convert to ObjectId
         const jobObjectId = new mongoose.Types.ObjectId(listingId);
         const applicantObjectId = new mongoose.Types.ObjectId(applicantId);
 
-        console.log(jobObjectId)
+        // console.log(jobObjectId)
 
         // Get the job document
         const job = await Job.findOne({ _id: listingId });

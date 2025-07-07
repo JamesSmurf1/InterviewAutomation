@@ -22,11 +22,16 @@ const ViewApplicants = () => {
     fetchData();
   }, [getMyListing]);
 
-  const handleStatus = (status: string, applicantId: any, listingId: any) => {
-    setStatus(status, applicantId, listingId)
+  const handleStatus = async (status: string, applicantId: any, listingId: any) => {
+    const success = await setStatus(status, applicantId, listingId);
+    if (success) {
+      toast.success(`Applicant ${status === 'accepted' ? 'accepted' : 'rejected'} successfully`);
+    } else {
+      toast.error(`Failed to ${status === 'accepted' ? 'accept' : 'reject'} applicant`);
+    }
+  };
 
-    console.log(status)
-  }
+
 
   const handleSelectJob = async (jobId: string) => {
     setSelectedJobId(jobId);
@@ -50,7 +55,6 @@ const ViewApplicants = () => {
 
   const handleToggleQuestions = async () => {
 
-    console.log(selectedJobId)
     if (!selectedJobId) return;
 
     if (questionsLoaded) {
@@ -104,7 +108,6 @@ const ViewApplicants = () => {
           <div className="space-y-4">
             {applicants.map((applicant: any) => {
               const isExpanded = expandedApplicantId === applicant._id;
-
               return (
                 <div
                   key={applicant._id}
@@ -118,6 +121,20 @@ const ViewApplicants = () => {
                   </p>
                   <p className="text-xs text-gray-500 mt-2">
                     Applied on: {new Date(applicant.createdAt).toLocaleDateString()}
+                  </p>
+
+                  <p className="text-xs text-gray-500 mt-2">
+                    status :{' '}
+                    <span
+                      className={`uppercase font-bold ${applicant?.status === 'accepted'
+                        ? 'text-green-400'
+                        : applicant?.status === 'rejected'
+                          ? 'text-red-400'
+                          : 'text-gray-400'
+                        }`}
+                    >
+                      {applicant?.status}
+                    </span>
                   </p>
 
                   <div className="flex gap-4 mt-4 flex-wrap">
@@ -135,10 +152,10 @@ const ViewApplicants = () => {
                       {questionsLoaded ? 'Hide Questions' : 'Show Questions'}
                     </button>
 
-                    <button className="bg-blue-500 text-white px-5 py-2 rounded-lg text-sm" onClick={() => handleStatus('Accepted', applicant._id, selectedJobId)}>
+                    <button className="bg-blue-500 text-white px-5 py-2 rounded-lg text-sm" onClick={() => handleStatus('accepted', applicant.applicant._id, selectedJobId)}>
                       Accept
                     </button>
-                    <button className="bg-red-500 text-white px-5 py-2 rounded-lg text-sm" onClick={() => handleStatus('Reject', applicant._id, selectedJobId)}>
+                    <button className="bg-red-500 text-white px-5 py-2 rounded-lg text-sm" onClick={() => handleStatus('rejected', applicant.applicant._id, selectedJobId)}>
                       Reject
                     </button>
                   </div>

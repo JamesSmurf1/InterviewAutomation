@@ -21,7 +21,7 @@ interface CompanyProps {
   viewQuestion: (jobId: string) => Promise<string[] | null>;
   getDashboardData: () => Promise<DashboardStats | null>;
 
-  setStatus: (status: string, applicantId: any, listingId: any) => Promise<void>;
+  setStatus: (status: string, applicantId: any, listingId: any) => Promise<Boolean>;
 
 }
 
@@ -222,26 +222,18 @@ const useCompanyApiStore = create<CompanyProps>((set, get) => ({
       const res = await fetch(`/api/company/status`, {
         method: 'POST',
         headers: {
-          'content-type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status, applicantId, listingId })
+        body: JSON.stringify({ status, applicantId, listingId }),
       });
 
-      if (!res.ok) {
-        console.error('Failed to fetch applicants');
-        return null;
-      }
-
-      const data = await res.json();
-
-      console.log(data)
-
-      return data.applicants ?? [];
+      return res.ok;
     } catch (err) {
-      console.error('Error fetching applicants:', err);
-      return null;
+      console.error('Error updating status:', err);
+      return false;
     }
   }
+
 
 }));
 
