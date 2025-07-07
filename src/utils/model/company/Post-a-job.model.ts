@@ -37,12 +37,12 @@ const jobSchema = new mongoose.Schema(
       },
     ],
 
-    interviewQuestions: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'InterviewQuestion',
-      },
-    ],
+    // Post-a-job.model.ts (Job Schema)
+    interviewQuestions: {
+      type: [String],
+      default: [],
+    },
+
   },
   { timestamps: true }
 );

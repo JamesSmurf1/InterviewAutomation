@@ -7,11 +7,11 @@ const ViewApplicants = () => {
   const { myListings, getMyListing, getApplicantsOnJob, viewQuestion } = useCompanyApiStore();
 
   const [applicants, setApplicants] = useState<any[]>([]);
-  const [interviewData, setInterviewData] = useState<any[]>([]);
+  const [interviewQuestions, setInterviewQuestions] = useState<string[]>([]);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [expandedApplicantId, setExpandedApplicantId] = useState<string | null>(null);
-  const [showQuestions, setShowQuestions] = useState<boolean>(false);
+  const [questionsLoaded, setQuestionsLoaded] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,8 +25,8 @@ const ViewApplicants = () => {
   const handleSelectJob = async (jobId: string) => {
     setSelectedJobId(jobId);
     setLoading(true);
-    setShowQuestions(false);
-    setInterviewData([]);
+    setInterviewQuestions([]);
+    setQuestionsLoaded(false);
     const data = await getApplicantsOnJob(jobId);
     if (data) {
       setApplicants(data);
@@ -39,20 +39,22 @@ const ViewApplicants = () => {
   };
 
   const toggleAnswers = (applicantId: string) => {
-    setExpandedApplicantId(prev => (prev === applicantId ? null : applicantId));
+    setExpandedApplicantId((prev) => (prev === applicantId ? null : applicantId));
   };
 
   const handleToggleQuestions = async () => {
     if (!selectedJobId) return;
-    if (showQuestions) {
-      setShowQuestions(false);
+
+    if (questionsLoaded) {
+      setInterviewQuestions([]);
+      setQuestionsLoaded(false);
       return;
     }
 
     const data = await viewQuestion(selectedJobId);
-    if (data) {
-      setInterviewData(data);
-      setShowQuestions(true);
+    if (Array.isArray(data)) {
+      setInterviewQuestions(data);
+      setQuestionsLoaded(true);
     } else {
       toast.error('Failed to load interview questions.');
     }
@@ -93,9 +95,6 @@ const ViewApplicants = () => {
           <div className="space-y-4">
             {applicants.map((applicant: any) => {
               const isExpanded = expandedApplicantId === applicant._id;
-              const full = interviewData.find(
-                (item: any) => item.applicant._id === applicant.applicant._id
-              );
 
               return (
                 <div
@@ -112,7 +111,7 @@ const ViewApplicants = () => {
                     Applied on: {new Date(applicant.createdAt).toLocaleDateString()}
                   </p>
 
-                  <div className="flex gap-4 mt-4">
+                  <div className="flex gap-4 mt-4 flex-wrap">
                     <button
                       onClick={() => toggleAnswers(applicant._id)}
                       className="bg-green-600 text-white px-5 py-2 rounded-lg text-sm"
@@ -124,7 +123,7 @@ const ViewApplicants = () => {
                       onClick={handleToggleQuestions}
                       className="bg-yellow-600 text-white px-5 py-2 rounded-lg text-sm"
                     >
-                      {showQuestions ? 'Hide Questions' : 'Show Questions'}
+                      {questionsLoaded ? 'Hide Questions' : 'Show Questions'}
                     </button>
 
                     <button className="bg-blue-500 text-white px-5 py-2 rounded-lg text-sm">
@@ -135,24 +134,24 @@ const ViewApplicants = () => {
                     </button>
                   </div>
 
-                  {/* Answers and Questions */}
+                  {/* Answers + Questions Section */}
                   {isExpanded && (
                     <div className="mt-4 space-y-2 text-sm text-white border-t border-gray-600 pt-4">
-                      {applicant.answers?.map((answer: string, index: number) => {
-                        const question = full?.interviewQuestion?.questions?.[index] ?? null;
-                        return (
-                          <div key={index} className="mb-2">
-                            {showQuestions && question && (
-                              <p className="text-gray-400 font-medium">
-                                Q{index + 1}: {question}
-                              </p>
-                            )}
-                            <p className="text-white ml-2">
-                              <span className="text-green-400">Answer:</span> {answer}
+                      {(applicant.answers || []).map((answer: string, index: number) => (
+                        <div key={index} className="mb-2">
+                          {questionsLoaded && interviewQuestions[index] && (
+                            <p className="text-gray-400 font-medium">
+                              Q{index + 1}: {interviewQuestions[index]}
                             </p>
-                          </div>
-                        );
-                      })}
+                          )}
+                          <p className="text-white ml-2">
+                            <span className="text-green-400">Answer:</span> {answer}
+                          </p>
+                        </div>
+                      ))}
+                      {(!applicant.answers || applicant.answers.length === 0) && (
+                        <p className="text-gray-400 italic">No answers submitted.</p>
+                      )}
                     </div>
                   )}
                 </div>

@@ -100,67 +100,81 @@ const MyApplications = () => {
           {myApplications.length === 0 ? (
             <p className="text-gray-400">You haven't applied to any jobs yet.</p>
           ) : (
-            myApplications.map((job) => (
-              <div
-                key={job._id}
-                className="bg-[#1E2130] p-5 rounded-lg border border-gray-700 shadow"
-              >
-                <h2 className="text-xl font-semibold">{job.title}</h2>
+            myApplications.map((job) => {
+              const applicant = job.applicants.find(
+                (a: any) => a.applicant === currentUserId
+              );
+              const hasAnswered = applicant?.answers?.length > 0;
 
-                <p className="text-sm text-gray-400 mb-1">
-                  Company:{' '}
-                  <span className="text-white">{job?.posterId?.companyName}</span>
-                </p>
+              return (
+                <div
+                  key={job._id}
+                  className="bg-[#1E2130] p-5 rounded-lg border border-gray-700 shadow"
+                >
+                  <h2 className="text-xl font-semibold">{job.title}</h2>
 
-                <p className="text-sm text-gray-400">
-                  {job.position} • {job.type}
-                </p>
-
-                <p className="mt-2 text-gray-300">{job.description}</p>
-
-                <p className="text-sm text-gray-500 mt-1">
-                  Location: {job.location}
-                </p>
-
-                {job.salary && (
-                  <p className="text-sm text-gray-500">Salary: {job.salary}</p>
-                )}
-
-                {job.requirements && (
-                  <p className="text-sm text-gray-400 mt-2">
-                    <span className="font-medium text-white">Requirements:</span>{' '}
-                    {job.requirements}
+                  <p className="text-sm text-gray-400 mb-1">
+                    Company:{' '}
+                    <span className="text-white">{job?.posterId?.companyName}</span>
                   </p>
-                )}
 
-                <p className="text-sm text-gray-400 mt-1">
-                  Status: <span className="text-white">Pending</span>
-                </p>
+                  <p className="text-sm text-gray-400">
+                    {job.position} • {job.type}
+                  </p>
 
-                <p className="text-xs text-gray-500 mt-2">
-                  Applied on: {new Date(job.createdAt).toLocaleDateString()}
-                </p>
+                  <p className="mt-2 text-gray-300">{job.description}</p>
 
-                <div className="flex gap-[15px] flex-wrap mt-4">
-                  <button
-                    onClick={() => handleUnapply(job._id)}
-                    className="bg-red-500 hover:bg-red-400 text-white px-[25px] py-[15px] rounded-lg text-sm"
-                  >
-                    Unapply
-                  </button>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Location: {job.location}
+                  </p>
 
-                  {Array.isArray(job.interviewQuestions) &&
-                    job.interviewQuestions.length > 0 && (
-                      <button
-                        onClick={() => handleTakeInterview(job._id)}
-                        className="bg-blue-500 hover:bg-blue-400 text-white px-[25px] py-[15px] rounded-lg text-sm"
-                      >
-                        Take Interview
-                      </button>
-                    )}
+                  {job.salary && (
+                    <p className="text-sm text-gray-500">Salary: {job.salary}</p>
+                  )}
+
+                  {job.requirements && (
+                    <p className="text-sm text-gray-400 mt-2">
+                      <span className="font-medium text-white">Requirements:</span>{' '}
+                      {job.requirements}
+                    </p>
+                  )}
+
+                  <p className="text-sm text-gray-400 mt-1">
+                    Status: <span className="text-white">Pending</span>
+                  </p>
+
+                  <p className="text-xs text-gray-500 mt-2">
+                    Applied on: {new Date(job.createdAt).toLocaleDateString()}
+                  </p>
+
+                  <div className="flex gap-[15px] flex-wrap mt-4">
+                    <button
+                      onClick={() => handleUnapply(job._id)}
+                      className="bg-red-500 hover:bg-red-400 text-white px-[25px] py-[15px] rounded-lg text-sm"
+                    >
+                      Unapply
+                    </button>
+
+                    {Array.isArray(job.interviewQuestions) &&
+                      job.interviewQuestions.length > 0 && (
+                        <button
+                          onClick={() => {
+                            if (!hasAnswered) handleTakeInterview(job._id);
+                          }}
+                          disabled={hasAnswered}
+                          className={`px-[25px] py-[15px] rounded-lg text-sm ${
+                            hasAnswered
+                              ? 'bg-gray-500 cursor-not-allowed'
+                              : 'bg-blue-500 hover:bg-blue-400 text-white'
+                          }`}
+                        >
+                          {hasAnswered ? 'Interview Submitted' : 'Take Interview'}
+                        </button>
+                      )}
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 

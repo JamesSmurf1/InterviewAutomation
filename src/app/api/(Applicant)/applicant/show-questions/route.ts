@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { connectDb } from '@/utils/utility/ConnectDb';
-import InterviewQuestion from '@/utils/model/company/Question.model';
+import Job from '@/utils/model/company/Post-a-job.model';
 
 export const POST = async (req: Request) => {
     const body = await req.json()
@@ -13,13 +13,13 @@ export const POST = async (req: Request) => {
 
     try {
         await connectDb();
-        const interview = await InterviewQuestion.findOne({ job: jobId });
+        const JobQuestions = await Job.findOne({ _id: jobId });
 
-        if (!interview) {
+        if (!JobQuestions) {
             return NextResponse.json({ message: 'No interview found' }, { status: 404 });
         }
 
-        return NextResponse.json({ questions: interview.questions });
+        return NextResponse.json({ questions: JobQuestions.interviewQuestions });
     } catch (err) {
         console.error('GET interview questions error:', err);
         return NextResponse.json({ message: 'Server error' }, { status: 500 });

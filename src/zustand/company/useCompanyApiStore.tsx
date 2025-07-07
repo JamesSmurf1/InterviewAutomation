@@ -165,6 +165,9 @@ const useCompanyApiStore = create<CompanyProps>((set, get) => ({
       }
 
       const data = await res.json();
+
+      console.log(data)
+
       return data.applicants ?? [];
     } catch (err) {
       console.error('Error fetching applicants:', err);
@@ -174,7 +177,7 @@ const useCompanyApiStore = create<CompanyProps>((set, get) => ({
 
   viewQuestion: async (jobId) => {
     try {
-      const res = await fetch(`/api/company/view-answers`, {
+      const res = await fetch(`/api/company/view-question`, {
         method: 'POST',
         headers: {
           'content-type': 'application/json'
