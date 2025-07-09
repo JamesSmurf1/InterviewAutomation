@@ -48,18 +48,13 @@ export const GET = async () => {
       );
 
       if (applicant && Array.isArray(applicant.answers) && applicant.answers.length > 0) {
-        // ✅ Return immediately if answers exist
-        // return NextResponse.json({
-        //   message: "User has already answered",
-        //   jobId: job._id,
-        //   answers: applicant.answers,
-        // });
 
-        console.log(applicant.answers)
       }
     }
 
     // If no job has the user with filled answers
+
+    console.log(myAppliedJobs)
     return NextResponse.json(myAppliedJobs);
   } catch (error) {
     console.error("Error fetching applied jobs:", error);

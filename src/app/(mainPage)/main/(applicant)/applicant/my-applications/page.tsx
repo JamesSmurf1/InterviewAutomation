@@ -24,7 +24,7 @@ const MyApplications = () => {
     const fetchData = async () => {
       setLoading(true);
       const user = await getLoggedInUser();
-      setCurrentUserId(user?._id); // assumes returned object has _id
+      setCurrentUserId(user?._id);
       await GetMyApplications();
       setLoading(false);
     };
@@ -140,8 +140,25 @@ const MyApplications = () => {
                   )}
 
                   <p className="text-sm text-gray-400 mt-1">
-                    Status: <span className="text-white">Pending</span>
+                    Status:{' '}
+                    <span
+                      className={`font-bold ${applicant?.status === 'accepted'
+                          ? 'text-green-400'
+                          : applicant?.status === 'rejected'
+                            ? 'text-red-400'
+                            : 'text-white'
+                        }`}
+                    >
+                      {applicant?.status?.toUpperCase() || 'PENDING'}
+                    </span>
                   </p>
+
+                  {applicant?._id && (
+                    <p className="text-sm text-gray-400 mt-1">
+                      Your Application ID:{' '}
+                      <span className="text-white font-mono">{applicant._id}</span>
+                    </p>
+                  )}
 
                   <p className="text-xs text-gray-500 mt-2">
                     Applied on: {new Date(job.createdAt).toLocaleDateString()}
@@ -162,11 +179,10 @@ const MyApplications = () => {
                             if (!hasAnswered) handleTakeInterview(job._id);
                           }}
                           disabled={hasAnswered}
-                          className={`px-[25px] py-[15px] rounded-lg text-sm ${
-                            hasAnswered
+                          className={`px-[25px] py-[15px] rounded-lg text-sm ${hasAnswered
                               ? 'bg-gray-500 cursor-not-allowed'
                               : 'bg-blue-500 hover:bg-blue-400 text-white'
-                          }`}
+                            }`}
                         >
                           {hasAnswered ? 'Interview Submitted' : 'Take Interview'}
                         </button>
@@ -200,11 +216,10 @@ const MyApplications = () => {
               <div className="mt-6 flex justify-between">
                 <button
                   onClick={handleSubmitInterview}
-                  className={`px-4 py-2 rounded ${
-                    allAnswered
+                  className={`px-4 py-2 rounded ${allAnswered
                       ? 'bg-green-500 hover:bg-green-600'
                       : 'bg-gray-500 cursor-not-allowed'
-                  }`}
+                    }`}
                   disabled={!allAnswered}
                 >
                   Submit
