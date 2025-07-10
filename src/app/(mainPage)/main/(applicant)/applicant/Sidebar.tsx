@@ -35,21 +35,11 @@ const Sidebar = () => {
 
         {/* Navigation */}
         <nav className="space-y-2">
-          <Link href="/main/applicant/dashboard-overview">
-            <SidebarItem label="Dashboard Overview" />
-          </Link>
-          <Link href="/main/applicant/available-jobs">
-            <SidebarItem label="Available Jobs" />
-          </Link>
-          <Link href="/main/applicant/my-applications">
-            <SidebarItem label="My Applications" />
-          </Link>
-          <Link href="/main/applicant/messages">
-            <SidebarItem label="Messages" />
-          </Link>
-          <Link href="/main/applicant/settings">
-            <SidebarItem label="Settings" />
-          </Link>
+          <Link href="/main/applicant/dashboard-overview"><SidebarItem label="Dashboard Overview" /></Link>
+          <Link href="/main/applicant/available-jobs"><SidebarItem label="Available Jobs" /></Link>
+          <Link href="/main/applicant/my-applications"><SidebarItem label="My Applications" /></Link>
+          {/* <Link href="/main/applicant/messages"><SidebarItem label="Messages" /></Link>
+          <Link href="/main/applicant/settings"><SidebarItem label="Settings" /></Link> */}
         </nav>
       </div>
 

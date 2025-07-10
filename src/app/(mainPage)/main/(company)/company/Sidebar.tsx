@@ -41,8 +41,8 @@ const Sidebar = () => {
           <Link href="/main/company/post-job"><SidebarItem label="Post a Job" /></Link>
           <Link href="/main/company/manage-listings"><SidebarItem label="Manage Listings" /></Link>
           <Link href="/main/company/view-applicants"><SidebarItem label="View Applicants" /></Link>
-          <Link href="/main/company/messages"><SidebarItem label="Messages" /></Link>
-          <Link href="/main/company/settings"><SidebarItem label="Settings" /></Link>
+          {/* <Link href="/main/company/messages"><SidebarItem label="Messages" /></Link> */}
+          {/* <Link href="/main/company/settings"><SidebarItem label="Settings" /></Link> */}
         </nav>
       </div>
 
