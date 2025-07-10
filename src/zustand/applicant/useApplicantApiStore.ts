@@ -11,6 +11,7 @@ interface ApplicantProps {
   GetMyApplications: () => Promise<void>;
   GetInterviewQuestions: (jobId: string) => Promise<void>;
   submitAnswer: (answers: string[], jobId: string, applicantId: string) => Promise<void>;
+  getDashboardData: () => Promise<any>;
 }
 
 const useApplicantApiStore = create<ApplicantProps>((set, get) => ({
@@ -113,7 +114,19 @@ const useApplicantApiStore = create<ApplicantProps>((set, get) => ({
       console.error('Error submitting answers:', error);
       throw error;
     }
-  }
+  },
+
+  getDashboardData: async () => {
+    try {
+      const res = await fetch('/api/applicant/dashboard');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to fetch dashboard data');
+      return data;
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      throw error;
+    }
+  },
 
 
 }));
