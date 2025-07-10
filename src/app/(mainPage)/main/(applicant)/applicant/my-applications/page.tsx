@@ -169,7 +169,7 @@ const MyApplications = () => {
                       onClick={() => handleUnapply(job._id)}
                       className="bg-red-500 hover:bg-red-400 text-white px-[25px] py-[15px] rounded-lg text-sm"
                     >
-                      Unapply
+                      Remove Application
                     </button>
 
                     {Array.isArray(job.interviewQuestions) &&
